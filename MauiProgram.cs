@@ -4,6 +4,8 @@ using System.Text;
 using System.Text.Json;
 using Hephaistos_Maui.Models;
 
+
+
 namespace Hephaistos_Maui
 {
     public static class MauiProgram
@@ -55,8 +57,78 @@ namespace Hephaistos_Maui
                 return false;
             }
         }
-
-       
+        public static async Task<bool> SaveSubjectsAsync(List<Subject> subjects)
+        {
+            try
+            {
+                using HttpClient client = new();
+                var jsonContent = new StringContent(JsonSerializer.Serialize(subjects), System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PutAsync($"{apiBaseUrl}/Users/CompletedSubjects", jsonContent);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hiba a tárgyak mentésekor: {ex.Message}");
+                return false;
+            }
+        }
+        public static async Task<bool> DeactivateProfileAsync()
+        {
+            try
+            {
+                using HttpClient client = new();
+                var response = await client.PostAsync($"{apiBaseUrl}/Users/Deactivate", null);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hiba a profil inaktiválásakor: {ex.Message}");
+                return false;
+            }
+        }
+        public static async Task<bool> SaveUserProfileAsync(User user)
+        {
+            try
+            {
+                using HttpClient client = new();
+                var jsonContent = new StringContent(JsonSerializer.Serialize(user), System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PutAsync($"{apiBaseUrl}/Users/Profile", jsonContent);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hiba a profil mentésekor: {ex.Message}");
+                return false;
+            }
+        }
+        public static async Task<List<Subject>?> LoadSubjectsAsync()
+        {
+            try
+            {
+                using HttpClient client = new();
+                string json = await client.GetStringAsync($"{apiBaseUrl}/Subjects/Major");
+                return JsonSerializer.Deserialize<List<Subject>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hiba a tárgyak betöltésekor: {ex.Message}");
+                return null;
+            }
+        }
+        public static async Task<User?> LoadUserAsync()
+        {
+            try
+            {
+                using HttpClient client = new();
+                string json = await client.GetStringAsync($"{apiBaseUrl}/Users/Profile");
+                return JsonSerializer.Deserialize<User>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hiba a felhasználó betöltésekor: {ex.Message}");
+                return null;
+            }
+        }
         public static async Task<bool> LoginAsync(string usernameOrEmail, string password, bool stayLoggedIn)
         {
             try
